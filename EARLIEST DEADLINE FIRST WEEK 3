@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int id, period, execution_time, deadline, remaining_time;
+} Task;
+
+int compare_by_deadline(const void *a, const void *b) {
+    return ((Task*)a)->deadline - ((Task*)b)->deadline;
+}
+
+void EDF_Scheduling(Task tasks[], int num_tasks, int total_time) {
+    printf("\nEarliest Deadline First Scheduling (EDF):\n");
+
+    for (int time = 0; time < total_time; time++) {
+        qsort(tasks, num_tasks, sizeof(Task), compare_by_deadline);
+
+        int selected = -1;
+        for (int i = 0; i < num_tasks; i++) {
+            if (tasks[i].remaining_time > 0) {
+                selected = i;
+                break;
+            }
+        }
+
+        if (selected != -1) {
+            printf("Time %d: Task %d executing (Deadline: %d)\n", time, tasks[selected].id, tasks[selected].deadline);
+            tasks[selected].remaining_time--;
+
+            if (tasks[selected].remaining_time == 0) {
+                tasks[selected].remaining_time = tasks[selected].execution_time;
+                tasks[selected].deadline += tasks[selected].period;
+            }
+        } else {
+            printf("Time %d: Idle\n", time);
+        }
+    }
+}
+
+int main() {
+    Task tasks[] = {{1, 5, 2, 5, 2}, {2, 10, 3, 10, 3}, {3, 20, 5, 20, 5}};
+    EDF_Scheduling(tasks, 3, 20);
+    return 0;
+}
